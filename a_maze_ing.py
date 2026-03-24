@@ -1,0 +1,207 @@
+#!/usr/bin/env python3
+"""
+Docstring pour a_maze_ing
+"""
+
+import sys
+import os
+import termios
+import tty
+from typing import Any, List, Tuple
+from config_loader import get_config
+from mazegen import MazeManager, BFS
+
+
+def get_input() -> str:
+    """Get a single character from stdin without requiring Enter"""
+
+    fd = sys.stdin.fileno()
+    old_settings = termios.tcgetattr(fd)
+    try:
+        tty.setraw(sys.stdin.fileno())
+        ch = sys.stdin.read(1)
+    finally:
+        termios.tcsetattr(fd, termios.TCSADRAIN, old_settings)
+    return ch
+
+
+def clear_screen() -> None:
+    """Clear the terminal screen"""
+
+    os.system("clear" if os.name != "nt" else "cls")
+
+
+def print_banner() -> None:
+    """Print the ASCII banner"""
+
+    print()
+    print(
+        (
+            "   ░███         ░███     ░███    ░███    ░█████████ "
+            "░██████████     ░██████░███    ░██   ░██████\n"
+            "  ░██░██        ░████   ░████   ░██░██         ░██  "
+            "░██               ░██  ░████   ░██  ░██   ░██\n"
+            " ░██  ░██       ░██░██ ░██░██  ░██  ░██       ░██   "
+            "░██               ░██  ░██░██  ░██ ░██\n"
+            "░█████████      ░██ ░████ ░██ ░█████████    ░███    "
+            "░█████████        ░██  ░██ ░██ ░██ ░██  █████\n"
+            "░██    ░██      ░██  ░██  ░██ ░██    ░██   ░██      "
+            "░██               ░██  ░██  ░██░██ ░██     ██\n"
+            "░██    ░██      ░██       ░██ ░██    ░██  ░██       "
+            "░██               ░██  ░██   ░████  ░██  ░███\n"
+            "░██    ░██ ░███ ░██       ░██ ░██    ░██ ░█████████ "
+            "░██████████ ░██ ░██████░██    ░███   ░█████░█"
+        )
+    )
+    print("\nby wehan and eberling")
+    print("\n\n\n\n")
+
+
+def print_menu(show_path: bool, color: str) -> None:
+    """Print the interactive menu as an ASCII table"""
+
+    path_status = "ON" if show_path else "OFF"
+    color_status = color
+
+    menu = f"""
+                    A-MAZE-ING MENU
+----------------------------------------------------------
+  [1] Generate maze
+  [2] Show / Hide shortest path  [{path_status}]
+  [3] Change colors
+      └─ Current: {color_status}
+  [Q] Quit
+----------------------------------------------------------
+"""
+    print(menu, end="", flush=True)
+
+
+def print_color_submenu() -> None:
+    """Print the color selection submenu"""
+
+    menu = """
+                    COLOR SELECTION MENU
+----------------------------------------------------------
+  [1] Default (no colors)
+  [2] Red
+  [3] Green
+  [4] Yellow
+  [B] Back to main menu
+----------------------------------------------------------
+"""
+    print(menu, end="", flush=True)
+
+
+def generate_maze(config: dict[str, Any]) -> MazeManager:
+    """Generate a new maze"""
+
+    mm = MazeManager(config)
+    mm.generate_maze_dfs()
+    return mm
+
+
+def calculate_path(mm: MazeManager) -> List[Tuple[int, int]] | None:
+    """Calculate the shortest path for the maze"""
+
+    bfs = BFS()
+    path = bfs.shortest_path(
+        maze=mm.maze,
+        height=mm.height,
+        width=mm.width,
+        start=mm.entry,
+        end=mm.exit,
+    )
+    return path
+
+
+def display_maze(
+    mm: MazeManager,
+    path: List[Tuple[int, int]] | None = None,
+    show_path: bool = True,
+) -> None:
+    """Display the maze with optional path"""
+
+    if path is None:
+        path = []
+    if not show_path:
+        path = []
+    mm.print_maze(path)
+
+
+def main() -> None:
+    """
+    Main entrypoint of the program
+    """
+
+    print_banner()
+
+    if len(sys.argv) >= 2:
+        config_file = sys.argv[1]
+    else:
+        print("Correct usage: python3 a_maze_ing.py <config_file>")
+        exit()
+
+    config = get_config(config_file)
+    config["COLOR"] = "Default"
+    if config.get("SEED") is None:
+        config["SEED"] = None
+
+    mm = MazeManager(config)
+    mm.generate_maze_dfs()
+    path = calculate_path(mm)
+
+    show_path = True
+
+    while True:
+        clear_screen()
+        print_banner()
+        display_maze(mm, path, show_path)
+        print_menu(show_path, config["COLOR"])
+
+        choice = get_input().upper()
+
+        if choice == "1":
+            mm = generate_maze(config)
+            path = calculate_path(mm)
+            clear_screen()
+            print_banner()
+            display_maze(mm, path, show_path)
+
+        elif choice == "2":
+            show_path = not show_path
+
+        elif choice == "3":
+            color_map = {
+                "1": "Default",
+                "2": "Red",
+                "3": "Green",
+                "4": "Yellow",
+            }
+
+            while True:
+                clear_screen()
+                print_banner()
+                display_maze(mm, path, show_path)
+                print_color_submenu()
+
+                color_choice = get_input().upper()
+
+                if color_choice == "B":
+                    break
+
+                if color_choice in color_map:
+                    config["COLOR"] = color_map[color_choice]
+                    mm.color = color_map[color_choice]
+                    clear_screen()
+                    print_banner()
+                    display_maze(mm, path, show_path)
+                    print_color_submenu()
+                    break
+
+        elif choice == "Q" or choice == "\x1b":  # \x1b = ESC
+            clear_screen()
+            print("\nGoodbye!\n")
+            break
+
+
+main()
