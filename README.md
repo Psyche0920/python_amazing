@@ -1,3 +1,16 @@
+<!-- repository-badges:start -->
+<div align="center">
+
+[![Contributors](https://img.shields.io/github/contributors/Psyche0920/python_amazing?style=for-the-badge)](https://github.com/Psyche0920/python_amazing/graphs/contributors)
+[![Forks](https://img.shields.io/github/forks/Psyche0920/python_amazing?style=for-the-badge)](https://github.com/Psyche0920/python_amazing/forks)
+[![Stars](https://img.shields.io/github/stars/Psyche0920/python_amazing?style=for-the-badge)](https://github.com/Psyche0920/python_amazing/stargazers)
+[![Issues](https://img.shields.io/github/issues/Psyche0920/python_amazing?style=for-the-badge)](https://github.com/Psyche0920/python_amazing/issues)
+[![License](https://img.shields.io/badge/license-not_specified-lightgrey?style=for-the-badge)](https://github.com/Psyche0920/python_amazing)
+[![LinkedIn](https://img.shields.io/badge/LinkedIn-Weijia_Han-0A66C2?style=for-the-badge&logo=linkedin)](https://www.linkedin.com/in/weijia-han-6162581b5/)
+
+</div>
+<!-- repository-badges:end -->
+
 *This project has been created as part of the 42 curriculum by wehan and eberling.*
 ![Demo](https://filedn.eu/lqAABNUSgVkfRyevTm4sSpR/NEVER_DELETE_ALWAYS_ADD/Screencast%20from%2001-31-2026%2003_56_06%20PM.gif)
 
